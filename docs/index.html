@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YOLO26 Real-Time Object Detection</title>
+<meta name="description" content="Real-time webcam object detection with Ultralytics YOLO26, PyTorch and OpenCV.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1d23; --muted: #5b6270; --card: #f4f6f9; --line: #e1e5ec;
+    --accent: #2563eb; --code-bg: #0f172a; --code-fg: #e2e8f0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0d1117; --fg: #e6edf3; --muted: #8b949e; --card: #161b22; --line: #30363d; --accent: #58a6ff; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 64px 0 32px; border-bottom: 1px solid var(--line); }
+  h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 0 0 12px; line-height: 1.15; }
+  h2 { margin: 48px 0 16px; font-size: 1.4rem; }
+  p.lead { color: var(--muted); font-size: 1.1rem; margin: 0 0 24px; }
+  .btns { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { display: inline-block; padding: 10px 18px; border-radius: 8px; text-decoration: none;
+         border: 1px solid var(--accent); color: var(--accent); font-weight: 600; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .card h3 { margin: 0 0 6px; font-size: 1rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+  pre { background: var(--code-bg); color: var(--code-fg); padding: 16px; border-radius: 10px;
+        overflow-x: auto; font-size: 0.9rem; line-height: 1.5; }
+  code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  td.num, th.num { text-align: right; }
+  .table-scroll { overflow-x: auto; }
+  .note { color: var(--muted); font-size: 0.9rem; }
+  footer { margin: 64px 0 32px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>YOLO26 Real-Time Object Detection</h1>
+    <p class="lead">Webcam object detection with Ultralytics YOLO26, PyTorch and OpenCV. Detects the 80 COCO classes, draws labelled boxes with an FPS overlay and prints a debounced list of what is in view.</p>
+    <div class="btns">
+      <a class="btn primary" href="https://github.com/evez12/Object-detection">View on GitHub</a>
+      <a class="btn" href="https://github.com/evez12/Object-detection#installation">Installation</a>
+      <a class="btn" href="https://docs.ultralytics.com/models/yolo26/">YOLO26 docs</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h2>Features</h2>
+  <div class="grid">
+    <div class="card"><h3>Five model sizes</h3><p>Choose from yolo26n, s, m, l or x with a single <code>--model</code> flag.</p></div>
+    <div class="card"><h3>Smart device selection</h3><p>Uses CUDA when PyTorch can really run on the GPU, otherwise falls back to CPU. FP16 on GPU.</p></div>
+    <div class="card"><h3>Class filtering</h3><p>Keep only the classes you care about, by name or COCO id.</p></div>
+    <div class="card"><h3>Stable output</h3><p>Per-frame detections are debounced so one-frame flickers are not reported.</p></div>
+    <div class="card"><h3>Robust camera I/O</h3><p>DirectShow on Windows, MJPG for HD at 30 FPS, clean shutdown on read failures.</p></div>
+    <div class="card"><h3>Typed, modular code</h3><p>Separate detection, drawing and CLI layers with explicit type hints.</p></div>
+  </div>
+
+  <h2>Quick start</h2>
+<pre><code>git clone https://github.com/evez12/Object-detection.git
+cd Object-detection
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+
+python main.py --model yolo26n.pt --conf 0.4</code></pre>
+  <p class="note">Press <strong>q</strong> in the video window to quit. Weights are downloaded automatically on first run.</p>
+
+  <h2>Choosing a model</h2>
+  <p class="note">Informal one-frame test on an RTX 5070 Laptop GPU (a computer mouse held in a hand). Not a benchmark.</p>
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>Model</th><th class="num">ms / frame</th><th>Result for the mouse</th></tr></thead>
+    <tbody>
+      <tr><td>yolo26n</td><td class="num">21</td><td>"cell phone" 0.74 (wrong)</td></tr>
+      <tr><td>yolo26s</td><td class="num">19</td><td>"cell phone" 0.61, "mouse" 0.26</td></tr>
+      <tr><td>yolo26m</td><td class="num">26</td><td>not detected</td></tr>
+      <tr><td>yolo26l</td><td class="num">38</td><td>"mouse" 0.62</td></tr>
+      <tr><td>yolo26x</td><td class="num">39</td><td>"mouse" 0.53</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">With yolo26l and a 1280x720 webcam, the full loop runs at about 26 FPS.</p>
+
+  <h2>Why no live in-browser demo?</h2>
+  <p>This is a desktop application: it reads a local webcam through OpenCV and runs PyTorch inference on your machine. GitHub Pages only hosts static files, so this page documents the project and links to the source.</p>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="https://github.com/evez12/Object-detection">github.com/evez12/Object-detection</a>
+  </div>
+</footer>
+</body>
+</html>
