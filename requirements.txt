@@ -1,0 +1,11 @@
+# RTX 50xx (Blackwell, sm_120) GPUs need a PyTorch build for CUDA 12.8 or newer.
+# PyPI only ships CPU-only wheels for Windows, and with --extra-index-url pip picks the
+# highest version from either source, which silently installs the CPU build. Pinning the
+# "+cu128" local version only matches the CUDA wheels, so the right build is always used.
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0+cu128
+torchvision==0.26.0+cu128
+
+ultralytics>=8.4.172   # YOLO26 + the `quantize` precision argument (tested with 8.4.172)
+opencv-python>=4.9.0
+numpy>=1.26

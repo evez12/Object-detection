@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDEs
+.idea/
+.vscode/
+
+# Model weights (large; Ultralytics downloads official weights automatically)
+*.pt
+*.pth
+*.onnx
+*.engine
+*.torchscript
+
+# Outputs and runs
+runs/
+*.mp4
+*.avi
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
